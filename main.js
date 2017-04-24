@@ -254,14 +254,14 @@ function createLoadingWindow() {
 		console.log(data.command)
 
 		if (data.cli == 'kmd') {
-			coincli.kmdcommand(data.command, function(err, command) {
+			coincli.kmdcommand(data.flock, data.command, function(err, command) {
 				//console.log(command);
 				var result = command;
 				event.sender.send('coincliReply', result);
 			});
 		}
 		if (data.cli == 'zec') {
-			coincli.zeccommand(data.command, function(err, command) {
+			coincli.zeccommand(data.flock, data.command, function(err, command) {
 				//console.log(command);
 				var result = command;
 				event.sender.send('coincliReply', result);

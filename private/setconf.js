@@ -118,6 +118,10 @@ function parse_status(callback) {
  * coind_conf.status(function(err, status) {
  *   console.log(status);
  * });
+
+ * setconf.status(DaemonConfPath, function(err, status) {
+ *    console.log(status);
+ * });
  *
  * // =>
  * [

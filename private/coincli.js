@@ -28,20 +28,26 @@
 
 var child_process = require('child_process'),
     path = require('path'),
-    os = require('os');
+    os = require('os'),
+    setconf = require('./setconf');
 
 if (os.platform() === 'darwin') {
   var komodocliBin = path.join(__dirname, '../assets/bin/osx/komodo-cli'),
-      zcashcliBin = '/Applications/ZCashSwingWalletUI.app/Contents/MacOS/zcash-cli';
+      komodoDir = process.env.HOME + '/Library/Application Support/Komodo',
+      zcashcliBin = '/Applications/ZCashSwingWalletUI.app/Contents/MacOS/zcash-cli',
+      zcashDir = process.env.HOME + '/Library/Application Support/Zcash';
 }
 
 if (os.platform() === 'linux') {
-  var komodocliBin = path.join(__dirname, '../assets/bin/linux64/komodo-cli');
+  var komodocliBin = path.join(__dirname, '../assets/bin/linux64/komodo-cli'),
+      komodoDir = process.env.HOME + '/.komodo';
 }
 
 if (os.platform() === 'win32') {
   var komodocliBin = path.join(__dirname, '../assets/bin/win64/komodo-cli.exe'),
-      komodocliBin = path.normalize(komodocliBin);
+      komodocliBin = path.normalize(komodocliBin),
+      komodoDir = process.env.APPDATA + '/Komodo',
+      komodoDir = path.normalize(komodoDir);
 }
 
 console.log(komodocliBin)
@@ -74,6 +80,53 @@ function parse_coincli_commands(callback) {
     else callback(error, stdout);
     //console.log(stdout)
   };
+}
+
+function getConf(flock) {
+  var komodoDir = '',
+        ZcashDir = '',
+        DaemonConfPath = '';
+
+  console.log(flock);
+
+  if (os.platform() === 'darwin') {
+    komodoDir = process.env.HOME + '/Library/Application Support/Komodo';
+    ZcashDir = process.env.HOME + '/Library/Application Support/Zcash';
+  }
+
+  if (os.platform() === 'linux') {
+    komodoDir = process.env.HOME + '/.komodo';
+    ZcashDir = process.env.HOME + '/.zcash';
+  }
+
+  if (os.platform() === 'win32') {
+    komodoDir = process.env.APPDATA + '/Komodo';
+    ZcashDir = process.env.APPDATA + '/Zcash';
+  }
+
+  switch (flock) {
+    case 'komodod':
+      DaemonConfPath = komodoDir + '/komodo.conf';
+      if (os.platform() === 'win32') {
+        DaemonConfPath = path.normalize(DaemonConfPath);
+        console.log('===>>> SHEPHERD API OUTPUT ===>>>');
+      }
+      break;
+    case 'zcashd':
+      DaemonConfPath = ZcashDir + '/zcash.conf';
+      if (os.platform() === 'win32') {
+        DaemonConfPath = path.normalize(DaemonConfPath);
+      }
+      break;
+    default:
+      DaemonConfPath = komodoDir + '/' + flock + '/' + flock + '.conf';
+      if (os.platform() === 'win32') {
+        DaemonConfPath = path.normalize(DaemonConfPath);
+      }
+  }
+
+  //console.log(DaemonConfPath);
+  return DaemonConfPath;
 }
 
 /**
@@ -121,14 +174,23 @@ function parse_coincli_commands(callback) {
  */
 
  
-function kmdcommand(kmd_command, callback) {
-  if (callback) {
+function kmdcommand(flock, kmd_command, callback) {
+  var ConfPath = getConf(flock);
+  console.log(ConfPath);
+  setconf.status(ConfPath, function(err, status) {
+    console.log(JSON.stringify(status));
+    if (callback) {
+      return status;
+    }
+  });
+  //console.log(JSON.stringify(this));
+  /*if (callback) {
     return this.exec(komodocliBin + " " + kmd_command,
       parse_coincli_commands(callback));  
-  }
+  }*/
 }
 
-function zeccommand(zec_command, callback) {
+function zeccommand(flock, zec_command, callback) {
   if (callback) {
     return this.exec(zcashcliBin + " " + zec_command,
       parse_coincli_commands(callback));  
