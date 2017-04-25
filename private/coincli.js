@@ -27,9 +27,11 @@
  */
 
 var child_process = require('child_process'),
+    fs = require('fs'),
     path = require('path'),
     os = require('os'),
-    setconf = require('./setconf');
+    request = require('request');
+    //setconf = require('./setconf');
 
 if (os.platform() === 'darwin') {
   var komodocliBin = path.join(__dirname, '../assets/bin/osx/komodo-cli'),
@@ -81,6 +83,79 @@ function parse_coincli_commands(callback) {
     //console.log(stdout)
   };
 }
+
+
+
+
+function parse_status_block(block) {
+  var match;
+
+  var parsed = {
+    settings: 'exists'
+  };
+
+  if ((match = block.match(/rpcuser=\s*(.*)/))) {
+    parsed.rpcuser = match[1];
+  }
+
+  if ((match = block.match(/rpcpass=\s*(.*)/))) {
+    parsed.rpcpass = match[1];
+  }
+
+  if ((match = block.match(/rpcpassword=\s*(.*)/))) {
+    parsed.rpcpassword = match[1];
+  }
+
+  if ((match = block.match(/rpcport=\s*(.*)/))) {
+    parsed.rpcport = match[1];
+  }
+
+  if ((match = block.match(/rpcbind=\s*(.*)/))) {
+    parsed.rpcbind = match[1];
+  }
+
+  if ((match = block.match(/server=\s*(.*)/))) {
+    parsed.server = match[1];
+  }
+
+  if ((match = block.match(/txindex=\s*(.*)/))) {
+    parsed.txindex = match[1];
+  }
+
+  if ((match = block.match(/addnode=\s*(.*)/))) {
+    parsed.addnode = match[1];
+  }
+
+  //console.log(parsed);
+  //console.log(JSON.stringify(parsed));
+
+  return parsed;
+}
+
+
+
+function parse_status(cmd, callback) {
+  return function(error, stdout, stderr) {
+    if (error) {
+      callback(error);
+    } else {
+      var tmp_output = stdout.trim().split('\n\n').map(parse_status_block);
+      console.log(tmp_output[0].rpcuser);
+      console.log(tmp_output[0].rpcpassword);
+      console.log(tmp_output[0].rpcport);
+      console.log(JSON.stringify(tmp_output[0]));
+      console.log(cmd);
+      console.log('===== coincli.js data output test finished =====')
+      callback(error, cmd);
+      //stdout.trim().split('\n\n').map(parse_status_block));
+      
+      //stdout.trim().split(/\s\*-usb:/g).map(parse_status_block));
+      //console.log(JSON.stringify(stdout.trim().split('\n\n').map(parse_status_block)));
+    }
+  };
+}
+
+
 
 function getConf(flock) {
   var komodoDir = '',
@@ -173,16 +248,26 @@ function getConf(flock) {
  * 
  */
 
+
+/*function status(confPath, callback) {
+  //console.log(confPath);
+  if (os.platform() === 'darwin' || os.platform() === 'linux') {
+    this.exec('cat "' + confPath + '"', parse_status(callback));
+  }
+
+  if (os.platform() === 'win32') {
+    this.exec('type "' + confPath + '"', parse_status(callback));
+  }
+}*/
  
 function kmdcommand(flock, kmd_command, callback) {
   var ConfPath = getConf(flock);
   console.log(ConfPath);
-  setconf.status(ConfPath, function(err, status) {
-    console.log(JSON.stringify(status));
-    if (callback) {
-      return status;
-    }
-  });
+  
+  if (os.platform() === 'darwin' || os.platform() === 'linux') {
+    this.exec('cat "' + ConfPath + '"', parse_status(kmd_command, callback));
+  }
+  
   //console.log(JSON.stringify(this));
   /*if (callback) {
     return this.exec(komodocliBin + " " + kmd_command,

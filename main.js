@@ -252,6 +252,7 @@ function createLoadingWindow() {
 		console.log(JSON.stringify(data));
 		console.log(data.cli)
 		console.log(data.command)
+		console.log('===== main.js data output test finished =====')
 
 		if (data.cli == 'kmd') {
 			coincli.kmdcommand(data.flock, data.command, function(err, command) {
