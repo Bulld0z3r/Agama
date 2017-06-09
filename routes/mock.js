@@ -34,11 +34,31 @@ mock.get = function(req, res, next) {
 	}
 	if (_url.indexOf('/api/dex/listunspent') > -1 ||
 			_url.indexOf('/api/dex/listtransactions') > -1 ||
-			_url.indexOf('/api/ss/getbalance') > -1 ||
-			_url.indexOf('/api/ww/refresh') > -1) {
+			//_url.indexOf('/api/dex/getbalance') > -1 ||
+			_url.indexOf('/api/dex/refresh') > -1) {
 		res.end(JSON.stringify({
 			'some key': 'some value'
 		}));
+	}
+
+	if (_url.indexOf('/api/dex/getbalance') > -1) {
+		if (_url.indexOf('/api/dex/getbalance') > -1) {
+			res.end(JSON.stringify({
+				"result":"success",
+				"received":0,
+				"sent":0,
+				"balancef":0,
+				"balance":0,
+				"interest":0,
+				"height":351716,
+				"mined":1055148,
+				"randipbits":2064902657,
+				"coin":"KMD",
+				"tag":"17286985499889946142"
+			}));
+		} else if (_url.indexOf('&balance=0') > -1) {
+			res.end(JSON.stringify([]));
+		}
 	}
 }
 

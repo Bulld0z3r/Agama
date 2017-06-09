@@ -237,7 +237,7 @@ cache.groomPost = function(req, res) {
 }
 
 var cacheCallInProgress = false,
-    cacheGlobLifetime = 600; // sec
+    cacheGlobLifetime = 10; // sec
 
 // TODO: reset calls' states on new /cache call start
 var mock = require('./mock');
@@ -517,11 +517,42 @@ cache.one = function(req, res, next) {
 
                 // basilisk balance fallback
                 const _parsedJSON = JSON.parse(body);
+                console.log(key);
+                console.log('getbalance body =======>');
+                console.log(body);
+
                 if (key === 'getbalance' &&
                   coin === 'KMD'/* &&
-                  ((_parsedJSON && _parsedJSON.balance === 0) || _parsedJSON === [])*/) {
+                  ((_parsedJSON && _parsedJSON.balance === 0) || body === [])*/) {
                   console.log('fallback to kmd explorer');
                   //http://kmd.explorer.supernet.org/api/addr/RDbGxL8QYdEp8sMULaVZS2E6XThcTKT9Jd/?noTxList=1
+                  request({
+                    url: 'http://kmd.explorer.supernet.org/api/addr/' + address + '/?noTxList=1',
+                    method: 'GET'
+                  }, function (error, response, body) {
+                    if (response &&
+                        response.statusCode &&
+                        response.statusCode === 200) {
+                      console.log(JSON.stringify(body));
+                      /*cache.io.emit('messages', {
+                        'message': {
+                          'shepherd': {
+                            'method': 'cache-one',
+                            'status': 'in progress',
+                            'iguanaAPI': {
+                              'method': key,
+                              'coin': coin,
+                              'address': address,
+                              'status': 'done',
+                              'resp': body
+                            }
+                          }
+                        }
+                      });*/
+                    } else {
+
+                    }
+                  });
                 }
 
                 outObj.basilisk[coin][address][key] = {};
@@ -544,7 +575,6 @@ cache.one = function(req, res, next) {
                   }
                 });
                 checkCallStack();
-
                 writeCache();
               }
               if (error ||

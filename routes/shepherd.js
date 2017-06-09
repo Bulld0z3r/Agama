@@ -94,6 +94,7 @@ shepherd.appConfig = {
   "v2": true,
   "useBasiliskInstance": true,
   "debug": true,
+  "nativeChangeAddress": ""
 };
 
 shepherd.writeLog = function(data) {
@@ -297,7 +298,7 @@ shepherd.post('/cli', function(req, res, next) {
     const _chain = req.body.payload.chain ? req.body.payload.chain : '';
     const _cmd = req.body.payload.cmd;
 
-    exec(komodocliBin + (_chain ? ' ac_name=' + _chain : '') + ' ' + _cmd, function(error, stdout, stderr) {
+    exec(komodocliBin + (_chain ? ' -ac_name=' + _chain : '') + ' ' + _cmd, function(error, stdout, stderr) {
       console.log('stdout: ' + stdout)
       console.log('stderr: ' + stderr)
 
