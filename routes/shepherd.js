@@ -344,11 +344,11 @@ shepherd.post('/cli', function(req, res, next) {
     const _cmd = req.body.payload.cmd;
     const _params = req.body.payload.params ? ' ' + req.body.payload.params : '';
 
-    if (!rpcConf[_chain]) {
-      shepherd.getConf(req.body.payload.chain === 'KMD' ? 'komodod' : req.body.payload.chain);
-    }
-
     if (_mode === 'default') {
+      if (!rpcConf[req.body.payload.chain]) {
+        shepherd.getConf(req.body.payload.chain === 'KMD' ? 'komodod' : req.body.payload.chain);
+      }
+
       let _body = {
         'agent': 'bitcoinrpc',
         'method': _cmd
@@ -363,11 +363,11 @@ shepherd.post('/cli', function(req, res, next) {
       }
 
       const options = {
-        url: `http://localhost:${rpcConf[_chain].port}`,
+        url: `http://localhost:${rpcConf[req.body.payload.chain].port}`,
         method: 'POST',
         auth: {
-          'user': rpcConf[_chain].user,
-          'pass': rpcConf[_chain].pass
+          'user': rpcConf[req.body.payload.chain].user,
+          'pass': rpcConf[req.body.payload.chain].pass
         },
         body: JSON.stringify(_body)
       };
